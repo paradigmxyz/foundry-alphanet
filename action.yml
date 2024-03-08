@@ -1,11 +1,11 @@
-name: 'EIP-3074 Tools'
-description: 'Several tools to use the EVM instructions introduced by EIP-3074'
+name: 'eip-3074-tools'
+description: "Patched versions of foundry's forge and solc to be used with EIP-3074 contracts"
 inputs:
-  contracts-directory:
-    description: 'The directory where your Solidity contracts are located'
+  foundry-directory:
+    description: 'The directory where your foundry project is located'
     required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.contracts-directory }}
+    - ${{ inputs.foundry-directory }}
