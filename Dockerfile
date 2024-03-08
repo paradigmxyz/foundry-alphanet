@@ -1,4 +1,4 @@
-FROM ubuntu:jammy-20240212 as builder
+FROM ubuntu:jammy-20240212 as solc-builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,11 +27,33 @@ RUN git apply solc.diff && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make solc
 
+FROM rust:1.76.0-slim-buster as forge-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    git
+
+ENV FORGE_COMMIT=5b7e4cb3c882b28f3c32ba580de27ce7381f415a
+
+RUN git clone https://github.com/foundry-rs/foundry.git /app/foundry
+
+WORKDIR /app/foundry
+
+RUN git checkout $FORGE_COMMIT
+
+COPY ./patches/forge.diff .
+
+RUN git apply forge.diff && \
+  cargo build --bin forge --release
+
 FROM ubuntu:jammy-20240212
 
 # Copy the compiled solc binary to a standard location
-COPY --from=builder /app/solidity/build/solc/solc /usr/local/bin/solc
-RUN chmod +x /usr/local/bin/solc
+COPY --from=solc-builder /app/solidity/build/solc/solc /usr/local/bin/solc
+COPY --from=forge-builder /app/foundry/target/release/forge /usr/local/bin/forge
+
+RUN chmod +x /usr/local/bin/solc && \
+    chmod +x /usr/local/bin/forge
 
 # Set the entrypoint to the solc binary
 ENTRYPOINT ["/usr/local/bin/solc"]
