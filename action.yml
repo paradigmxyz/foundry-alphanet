@@ -1,0 +1,11 @@
+name: 'EIP-3074 Tools'
+description: 'Several tools to use the EVM instructions introduced by EIP-3074'
+inputs:
+  contracts-directory:
+    description: 'The directory where your Solidity contracts are located'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.contracts-directory }}
