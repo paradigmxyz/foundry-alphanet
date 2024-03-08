@@ -12,6 +12,8 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - --use
+    - /usr/local/bin/solc
     - ${{ inputs.foundry-command }}
     - --root
     - ${{ inputs.foundry-directory }}
