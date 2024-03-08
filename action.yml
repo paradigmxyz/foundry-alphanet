@@ -1,11 +1,17 @@
 name: 'eip-3074-tools'
 description: "Patched versions of foundry's forge and solc to be used with EIP-3074 contracts"
 inputs:
+  foundry-command:
+    description: 'The foundry command to execute'
+    required: true
+    default: build
   foundry-directory:
-    description: 'The directory where your foundry project is located'
+    description: 'The root directory of your foundry project'
     required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - ${{ inputs.foundry-command }}
+    - --root
     - ${{ inputs.foundry-directory }}

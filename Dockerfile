@@ -57,3 +57,4 @@ RUN chmod +x /usr/local/bin/solc && \
 
 # Set the entrypoint to the solc binary
 ENTRYPOINT ["/usr/local/bin/forge"]
+CMD ["--help"]
