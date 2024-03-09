@@ -8,12 +8,13 @@ inputs:
   foundry-directory:
     description: 'The root directory of your foundry project'
     required: true
+  foundry-script:
+    description: 'The path to the forge script to execute'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
     - ${{ inputs.foundry-command }}
-    - --use
-    - /usr/local/bin/solc
-    - --root
     - ${{ inputs.foundry-directory }}
+    - ${{ inputs.foundry-script }}
