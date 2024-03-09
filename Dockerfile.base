@@ -54,3 +54,6 @@ COPY --from=forge-builder /app/foundry/target/release/forge /usr/local/bin/forge
 
 RUN chmod +x /usr/local/bin/solc && \
     chmod +x /usr/local/bin/forge
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
