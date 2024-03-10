@@ -28,3 +28,5 @@ main() {
         exec forge $FOUNDRY_COMMAND $SOLC_PATH $FOUNDRY_DIRECTORY
     fi
 }
+
+main "${@}"
