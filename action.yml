@@ -15,6 +15,9 @@ runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - --foundry-command
     - ${{ inputs.foundry-command }}
+    - --foundry-directory
     - ${{ inputs.foundry-directory }}
+    - --foundry-script
     - ${{ inputs.foundry-script }}
