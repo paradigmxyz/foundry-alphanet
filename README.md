@@ -20,7 +20,7 @@ these arguments:
 project of the script to execute.
 
 There's a github actions workflow in this repo that builds and publishes the
-image on each merge to master, it is availble at: `ghcr.io/fgimenez/eip3074-tools`
+image on each merge to main, it is availble at: `ghcr.io/fgimenez/eip3074-tools`
 
 ### How to use
 Containers created from this image should mount a local directory containing a
@@ -54,7 +54,7 @@ $ docker run --rm \
     --foundry-directory /app/foundry \
     --foundry-command "test -vvv"
 ```
-In this case we have signalled forge that we want incresed verbosity in the test
+In this case we have signalled forge that we want increased verbosity in the test
 output passing `test -vvvv` to `--foundry-command`.
 
 [clabby/eip-3074-foundry]: https://github.com/clabby/eip-3074-foundry
