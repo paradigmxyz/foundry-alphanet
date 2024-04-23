@@ -3,6 +3,9 @@
 Tools built around the patched versions of forge and the solidity compiler from
 [clabby/eip-3074-foundry], which support [EIP-3074] instructions.
 
+We intend to further roll out Foundry patches to support other EVM modifications such as
+new opcodes or precompiles.
+
 ## Docker image
 
 The Docker image defined in this repo contains both the patched solc and forge
@@ -20,7 +23,7 @@ these arguments:
 project of the script to execute.
 
 There's a github actions workflow in this repo that builds and publishes the
-image on each merge to main, it is availble at: `ghcr.io/fgimenez/eip3074-tools`
+image on each merge to main, it is available at: `ghcr.io/paradigmxyz/foundry-alphanet`
 
 ### How to use
 Containers created from this image should mount a local directory containing a
@@ -30,7 +33,7 @@ build a project, from the project root you can execute:
 $ docker run --rm \
     -v $(pwd):/app/foundry \
     -u $(id -u):$(id -g) \
-    ghcr.io/fgimenez/eip3074-tools:latest \
+    ghcr.io/paradigmxyz/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
     --foundry-command build
 ```
@@ -39,7 +42,7 @@ In this command:
 container.
 * `-u $(id -u):$(id -g)` makes sure that the files created will belong to the
 same user executing the command.
-* `ghcr.io/fgimenez/eip3074-tools:latest` is the image name
+* `ghcr.io/paradigmxyz/foundry-alphanet:latest` is the image name
 * `--foundry-directory /app/foundry` tells the entrypoint script to use
 `/app/foundry` in the container as the foundry project directory.
 * `--foundry-command build` tells the entrypoint script to use `build` as the
@@ -50,7 +53,7 @@ To run tests in a project, from the projects root:
 $ docker run --rm \
     -v $(pwd):/app/foundry \
     -u $(id -u):$(id -g) \
-    ghcr.io/fgimenez/eip3074-tools:latest \
+    ghcr.io/paradigmxyz/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
     --foundry-command "test -vvv"
 ```
