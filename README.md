@@ -1,4 +1,4 @@
-# eip-3074-tools
+# foundry-alphanet
 
 Tools built around the patched versions of forge and the solidity compiler from
 [clabby/eip-3074-foundry], which support [EIP-3074] instructions.
