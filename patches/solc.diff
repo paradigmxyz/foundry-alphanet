@@ -1,5 +1,5 @@
 diff --git a/libevmasm/Instruction.cpp b/libevmasm/Instruction.cpp
-index 174d12b5e355..cfd0d85a838e 100644
+index 174d12b5e..cfd0d85a8 100644
 --- a/libevmasm/Instruction.cpp
 +++ b/libevmasm/Instruction.cpp
 @@ -167,6 +167,8 @@ std::map<std::string, Instruction> const solidity::evmasm::c_instructions =
@@ -16,12 +16,12 @@ index 174d12b5e355..cfd0d85a838e 100644
  	{ Instruction::DELEGATECALL,	{ "DELEGATECALL",	0, 6, 1, true, Tier::Special } },
  	{ Instruction::STATICCALL,	{ "STATICCALL",		0, 6, 1, true, Tier::Special } },
 +	{ Instruction::AUTH,        { "AUTH",			0, 3, 1, true, Tier::Special } },
-+	{ Instruction::AUTHCALL,    { "AUTHCALL",		0, 8, 1, true, Tier::Special } },
++	{ Instruction::AUTHCALL,    { "AUTHCALL",		0, 7, 1, true, Tier::Special } },
  	{ Instruction::CREATE2,		{ "CREATE2",		0, 4, 1, true, Tier::Special } },
  	{ Instruction::REVERT,		{ "REVERT",		0, 2, 0, true, Tier::Zero } },
  	{ Instruction::INVALID,		{ "INVALID",		0, 0, 0, true, Tier::Zero } },
 diff --git a/libevmasm/Instruction.h b/libevmasm/Instruction.h
-index 2fddb11d80ea..b80a8b9d77af 100644
+index 2fddb11d8..b80a8b9d7 100644
 --- a/libevmasm/Instruction.h
 +++ b/libevmasm/Instruction.h
 @@ -183,6 +183,8 @@ enum class Instruction: uint8_t
@@ -34,7 +34,7 @@ index 2fddb11d80ea..b80a8b9d77af 100644
 
  	REVERT = 0xfd,		///< halt execution, revert state and return output data
 diff --git a/libevmasm/SemanticInformation.cpp b/libevmasm/SemanticInformation.cpp
-index 1971d9d45bb8..79ab7b29da13 100644
+index 1971d9d45..79ab7b29d 100644
 --- a/libevmasm/SemanticInformation.cpp
 +++ b/libevmasm/SemanticInformation.cpp
 @@ -104,10 +104,22 @@ std::vector<SemanticInformation::Operation> SemanticInformation::readWriteOperat
@@ -61,7 +61,7 @@ index 1971d9d45bb8..79ab7b29da13 100644
  		size_t paramCount = static_cast<size_t>(instructionInfo(_instruction, langutil::EVMVersion()).args);
  		std::vector<Operation> operations{
 diff --git a/libsolidity/analysis/TypeChecker.cpp b/libsolidity/analysis/TypeChecker.cpp
-index 5c28d3cd2a78..13303a9db05c 100644
+index 5c28d3cd2..13303a9db 100644
 --- a/libsolidity/analysis/TypeChecker.cpp
 +++ b/libsolidity/analysis/TypeChecker.cpp
 @@ -1453,7 +1453,8 @@ void TypeChecker::endVisit(ExpressionStatement const& _statement)
@@ -105,7 +105,7 @@ index 5c28d3cd2a78..13303a9db05c 100644
  	{
  		m_errorReporter.fatalTypeError(
 diff --git a/libsolidity/ast/Types.cpp b/libsolidity/ast/Types.cpp
-index 7b3e42143804..84dc331665ca 100644
+index 7b3e42143..84dc33166 100644
 --- a/libsolidity/ast/Types.cpp
 +++ b/libsolidity/ast/Types.cpp
 @@ -558,7 +558,8 @@ MemberList::MemberMap AddressType::nativeMembers(ASTNode const*) const
@@ -169,10 +169,10 @@ index 7b3e42143804..84dc331665ca 100644
  	case Kind::RIPEMD160:
  	case Kind::KECCAK256:
 diff --git a/libsolidity/ast/Types.h b/libsolidity/ast/Types.h
-index fd1b6a7d3df3..1334aa26ab77 100644
+index fd1b6a7d3..1334aa26a 100644
 --- a/libsolidity/ast/Types.h
 +++ b/libsolidity/ast/Types.h
-@@ -1254,6 +1254,7 @@ class FunctionType: public Type
+@@ -1254,6 +1254,7 @@ public:
  		BareCallCode, ///< CALLCODE without function hash
  		BareDelegateCall, ///< DELEGATECALL without function hash
  		BareStaticCall, ///< STATICCALL without function hash
@@ -180,7 +180,7 @@ index fd1b6a7d3df3..1334aa26ab77 100644
  		Creation, ///< external call using CREATE
  		Send, ///< CALL, but without data and gas
  		Transfer, ///< CALL, but without data and throws on error
-@@ -1494,6 +1495,7 @@ class FunctionType: public Type
+@@ -1494,6 +1495,7 @@ public:
  		case FunctionType::Kind::BareCallCode:
  		case FunctionType::Kind::BareDelegateCall:
  		case FunctionType::Kind::BareStaticCall:
@@ -189,7 +189,7 @@ index fd1b6a7d3df3..1334aa26ab77 100644
  		default:
  			return false;
 diff --git a/libsolidity/codegen/ExpressionCompiler.cpp b/libsolidity/codegen/ExpressionCompiler.cpp
-index 517f49c35331..e2dc892108fb 100644
+index 517f49c35..fd4e2691e 100644
 --- a/libsolidity/codegen/ExpressionCompiler.cpp
 +++ b/libsolidity/codegen/ExpressionCompiler.cpp
 @@ -727,6 +727,7 @@ bool ExpressionCompiler::visit(FunctionCall const& _functionCall)
@@ -228,21 +228,7 @@ index 517f49c35331..e2dc892108fb 100644
  	bool useStaticCall = funKind == FunctionType::Kind::BareStaticCall || (_functionType.stateMutability() <= StateMutability::View && m_context.evmVersion().hasStaticCall());
 
  	if (_tryCall)
-@@ -2762,7 +2765,12 @@ void ExpressionCompiler::appendExternalFunctionCall(
- 		m_context << Instruction::DUP2;
- 	}
-
--	// CALL arguments: outSize, outOff, inSize, inOff (already present up to here)
-+	// Append `0` to the stack for `AUTHCALL`'s `valueExt`.
-+	// The EIP-3074 spec says that the `valueExt` parameter is always supposed to be `0`.
-+	if (isAuthCall)
-+		m_context << u256(0);
-+
-+	// CALL arguments: outSize, outOff, inSize, inOff, [valueExt (if AUTHCALL)] (already present up to here)
- 	// [value,] addr, gas (stack top)
- 	if (isDelegateCall)
- 		solAssert(!_functionType.valueSet(), "Value set for delegatecall");
-@@ -2814,6 +2822,8 @@ void ExpressionCompiler::appendExternalFunctionCall(
+@@ -2814,6 +2817,8 @@ void ExpressionCompiler::appendExternalFunctionCall(
  	// Order is important here, STATICCALL might overlap with DELEGATECALL.
  	if (isDelegateCall)
  		m_context << Instruction::DELEGATECALL;
@@ -252,7 +238,7 @@ index 517f49c35331..e2dc892108fb 100644
  		m_context << Instruction::STATICCALL;
  	else
 diff --git a/libsolidity/codegen/ReturnInfo.cpp b/libsolidity/codegen/ReturnInfo.cpp
-index 28518d9b2a9a..7ddac63121be 100644
+index 28518d9b2..7ddac6312 100644
 --- a/libsolidity/codegen/ReturnInfo.cpp
 +++ b/libsolidity/codegen/ReturnInfo.cpp
 @@ -31,7 +31,8 @@ ReturnInfo::ReturnInfo(EVMVersion const& _evmVersion, FunctionType const& _funct
@@ -266,7 +252,7 @@ index 28518d9b2a9a..7ddac63121be 100644
  	if (!returnSuccessConditionAndReturndata)
  	{
 diff --git a/libsolidity/codegen/ir/IRGeneratorForStatements.cpp b/libsolidity/codegen/ir/IRGeneratorForStatements.cpp
-index a5196366fd30..ba0fb79a1fac 100644
+index a5196366f..e09495fb7 100644
 --- a/libsolidity/codegen/ir/IRGeneratorForStatements.cpp
 +++ b/libsolidity/codegen/ir/IRGeneratorForStatements.cpp
 @@ -1040,6 +1040,7 @@ void IRGeneratorForStatements::endVisit(FunctionCall const& _functionCall)
@@ -304,33 +290,7 @@ index a5196366fd30..ba0fb79a1fac 100644
  	);
 
  	solAssert(!_functionCall.annotation().tryCall);
-@@ -2735,7 +2738,7 @@ void IRGeneratorForStatements::appendBareCall(
- 			let <length> := mload(<arg>)
- 		</needsEncoding>
-
--		let <success> := <call>(<gas>, <address>, <?+value> <value>, </+value> <pos>, <length>, 0, 0)
-+		let <success> := <call>(<gas>, <address>, <?+value> <value>, </+value> <?+valueExt> <valueExt>, </+valueExt> <pos>, <length>, 0, 0)
- 		let <returndataVar> := <extractReturndataFunction>()
- 	)");
-
-@@ -2743,6 +2746,16 @@ void IRGeneratorForStatements::appendBareCall(
- 	templ("pos", m_context.newYulVariable());
- 	templ("length", m_context.newYulVariable());
-
-+	if (funKind == FunctionType::Kind::BareAuthCall)
-+	{
-+		// Currently, in the EIP-3074 spec, `valueExt` is always 0 for `AUTHCALL`.
-+		templ("valueExt", "0");
-+	}
-+	else
-+	{
-+		templ("valueExt", "");
-+	}
-+
- 	templ("arg", IRVariable(*_arguments.front()).commaSeparatedList());
- 	Type const& argType = type(*_arguments.front());
- 	if (argType == *TypeProvider::bytesMemory() || argType == *TypeProvider::stringMemory())
-@@ -2760,10 +2773,15 @@ void IRGeneratorForStatements::appendBareCall(
+@@ -2760,10 +2763,15 @@ void IRGeneratorForStatements::appendBareCall(
 
  	templ("address", IRVariable(_functionCall.expression()).part("address").name());
 
@@ -349,10 +309,10 @@ index a5196366fd30..ba0fb79a1fac 100644
  	else
  	{
 diff --git a/libsolidity/codegen/ir/IRGeneratorForStatements.h b/libsolidity/codegen/ir/IRGeneratorForStatements.h
-index f4ce2a7d00a1..a25e1c42b29a 100644
+index f4ce2a7d0..a25e1c42b 100644
 --- a/libsolidity/codegen/ir/IRGeneratorForStatements.h
 +++ b/libsolidity/codegen/ir/IRGeneratorForStatements.h
-@@ -162,7 +162,7 @@ class IRGeneratorForStatements: public IRGeneratorForStatementsBase
+@@ -162,7 +162,7 @@ private:
  		std::vector<ASTPointer<Expression const>> const& _arguments
  	);
 
@@ -362,7 +322,7 @@ index f4ce2a7d00a1..a25e1c42b29a 100644
  	void appendBareCall(
  		FunctionCall const& _functionCall,
 diff --git a/test/tools/yulInterpreter/EVMInstructionInterpreter.cpp b/test/tools/yulInterpreter/EVMInstructionInterpreter.cpp
-index 79dbc554a292..ddabdb8d3861 100644
+index 79dbc554a..ddabdb8d3 100644
 --- a/test/tools/yulInterpreter/EVMInstructionInterpreter.cpp
 +++ b/test/tools/yulInterpreter/EVMInstructionInterpreter.cpp
 @@ -351,6 +351,13 @@ u256 EVMInstructionInterpreter::eval(
