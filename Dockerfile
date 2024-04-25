@@ -1,3 +1,3 @@
-FROM ghcr.io/fgimenez/eip3074-tools:latest
+FROM ghcr.io/paradigmxyz/foundry-alphanet:latest
 
 ENTRYPOINT ["/entrypoint.sh"]
