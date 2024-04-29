@@ -10,20 +10,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && \
     update-ca-certificates
 
-ENV SOLC_COMMIT=c3af02c281f54932c0adcbdf32899d0d6e988850
+COPY . /app
 
-# Clone the Solidity repository
-RUN git clone https://github.com/ethereum/solidity.git /app/solidity
+WORKDIR /app
 
-WORKDIR /app/solidity
+RUN git submodule init && git submodule update --recursive
 
-RUN git checkout $SOLC_COMMIT
+WORKDIR /app/patches/solidity
 
-COPY ./patches/solc.diff .
-RUN git apply solc.diff && \
-    mkdir build && \
+RUN mkdir build && \
     cd build && \
-    ls -al /app/solidity && \
+    ls -al /app/patches/solidity && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make solc
 
@@ -33,26 +30,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     git
 
-ENV FORGE_COMMIT=5b7e4cb3c882b28f3c32ba580de27ce7381f415a
+COPY . /app
 
-RUN git clone https://github.com/foundry-rs/foundry.git /app/foundry
+WORKDIR /app
 
-WORKDIR /app/foundry
+RUN git submodule init && git submodule update --recursive
 
-RUN git checkout $FORGE_COMMIT
+WORKDIR /app/patches/foundry
 
-COPY ./patches/forge.diff .
-
-RUN git apply forge.diff && \
-  cargo build --bin forge --release && \
+RUN cargo build --bin forge --release && \
   cargo build --bin anvil --release
 
 FROM ubuntu:jammy-20240212
 
 # Copy the compiled solc binary to a standard location
-COPY --from=solc-builder /app/solidity/build/solc/solc /usr/local/bin/solc
-COPY --from=foundry-builder /app/foundry/target/release/forge /usr/local/bin/forge
-COPY --from=foundry-builder /app/foundry/target/release/anvil /usr/local/bin/anvil
+COPY --from=solc-builder /app/patches/solidity/build/solc/solc /usr/local/bin/solc
+COPY --from=foundry-builder /app/patches/foundry/target/release/forge /usr/local/bin/forge
+COPY --from=foundry-builder /app/patches/foundry/target/release/anvil /usr/local/bin/anvil
 
 RUN chmod +x /usr/local/bin/solc && \
     chmod +x /usr/local/bin/forge && \
