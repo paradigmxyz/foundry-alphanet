@@ -60,5 +60,5 @@ $ docker run --rm \
 In this case we have signalled forge that we want increased verbosity in the test
 output passing `test -vvvv` to `--foundry-command`.
 
-[clabby/eip-3074-foundry]: https://github.com/clabby/eip-3074-foundry
+[anton-rs/3074-invokers]: https://github.com/anton-rs/3074-invokers
 [EIP-3074]: https://eips.ethereum.org/EIPS/eip-3074
