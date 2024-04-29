@@ -1,7 +1,7 @@
 # foundry-alphanet
 
-Tools built around the patched versions of forge and the solidity compiler from
-[clabby/eip-3074-foundry], which support [EIP-3074] instructions.
+Tools built around the patched versions of revm, forge, and the solidity compiler from
+[anton-rs/3074-invokers], which support [EIP-3074] instructions.
 
 We intend to further roll out Foundry patches to support other EVM modifications such as
 new opcodes or precompiles.
@@ -53,7 +53,7 @@ To run tests in a project, from the projects root:
 $ docker run --rm \
     -v $(pwd):/app/foundry \
     -u $(id -u):$(id -g) \
-    ghcr.io/paradigmxyz/foundry-alphanet:latest \
+    jxom/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
     --foundry-command "test -vvv"
 ```
