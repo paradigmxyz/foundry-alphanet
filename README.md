@@ -53,7 +53,7 @@ To run tests in a project, from the projects root:
 $ docker run --rm \
     -v $(pwd):/app/foundry \
     -u $(id -u):$(id -g) \
-    jxom/foundry-alphanet:latest \
+    ghcr.io/paradigmxyz/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
     --foundry-command "test -vvv"
 ```
