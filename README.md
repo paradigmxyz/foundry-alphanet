@@ -69,7 +69,7 @@ $ docker run --rm \
     -u $(id -u):$(id -g) \
     -p 8545:8545 \
     ghcr.io/paradigmxyz/foundry-alphanet:latest \
-    --foundry-command "anvil --hardfork prague"
+    --foundry-command "anvil"
 ```
 
 [clabby/eip-3074-foundry]: https://github.com/clabby/eip-3074-foundry
