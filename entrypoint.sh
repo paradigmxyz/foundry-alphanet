@@ -25,7 +25,13 @@ main() {
     if [ "$FOUNDRY_COMMAND" = "script" ]; then
         exec forge script $FOUNDRY_SCRIPT $SOLC_PATH $FOUNDRY_DIRECTORY --fork-url http://localhost:8545 --broadcast -vvvv
     else
-        exec forge $FOUNDRY_COMMAND $SOLC_PATH $FOUNDRY_DIRECTORY
+        if [[ "$FOUNDRY_COMMAND" =~ ^forge ]]; then
+            exec $FOUNDRY_COMMAND $SOLC_PATH $FOUNDRY_DIRECTORY
+        elif [[ "$FOUNDRY_COMMAND" =~ ^anvil ]]; then
+            exec $FOUNDRY_COMMAND --host 0.0.0.0 --hardfork prague
+        fi
+        echo "Error: 'foundry-command' only supports 'forge' or 'anvil' binaries"
+        exit 1
     fi
 }
 

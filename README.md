@@ -35,7 +35,7 @@ $ docker run --rm \
     -u $(id -u):$(id -g) \
     ghcr.io/paradigmxyz/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
-    --foundry-command build
+    --foundry-command "forge build"
 ```
 In this command:
 * `-v $(pwd):/app/foundry` mounts the local directory in `/app/foundry` in the
@@ -45,8 +45,8 @@ same user executing the command.
 * `ghcr.io/paradigmxyz/foundry-alphanet:latest` is the image name
 * `--foundry-directory /app/foundry` tells the entrypoint script to use
 `/app/foundry` in the container as the foundry project directory.
-* `--foundry-command build` tells the entrypoint script to use `build` as the
-forge command.
+* `--foundry-command "forge build"` tells the entrypoint script to use `forge build` as the
+foundry command.
 
 To run tests in a project, from the projects root:
 ```shell
@@ -55,10 +55,22 @@ $ docker run --rm \
     -u $(id -u):$(id -g) \
     ghcr.io/paradigmxyz/foundry-alphanet:latest \
     --foundry-directory /app/foundry \
-    --foundry-command "test -vvv"
+    --foundry-command "forge test -vvv"
 ```
+
 In this case we have signalled forge that we want increased verbosity in the test
-output passing `test -vvvv` to `--foundry-command`.
+output passing `forge test -vvvv` to `--foundry-command`.
+
+To run Anvil:
+
+```shell
+$ docker run --rm \
+    -v $(pwd):/app/foundry \
+    -u $(id -u):$(id -g) \
+    -p 8545:8545 \
+    ghcr.io/paradigmxyz/foundry-alphanet:latest \
+    --foundry-command "anvil --hardfork prague"
+```
 
 [clabby/eip-3074-foundry]: https://github.com/clabby/eip-3074-foundry
 [EIP-3074]: https://eips.ethereum.org/EIPS/eip-3074

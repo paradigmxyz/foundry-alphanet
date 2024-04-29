@@ -27,7 +27,7 @@ RUN git apply solc.diff && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
     make solc
 
-FROM rust:1.76.0-slim-buster as forge-builder
+FROM rust:1.76.0-slim-buster as foundry-builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -44,18 +44,23 @@ RUN git checkout $FORGE_COMMIT
 COPY ./patches/forge.diff .
 
 RUN git apply forge.diff && \
-  cargo build --bin forge --release
+  cargo build --bin forge --release && \
+  cargo build --bin anvil --release
 
 FROM ubuntu:jammy-20240212
 
 # Copy the compiled solc binary to a standard location
 COPY --from=solc-builder /app/solidity/build/solc/solc /usr/local/bin/solc
-COPY --from=forge-builder /app/foundry/target/release/forge /usr/local/bin/forge
+COPY --from=foundry-builder /app/foundry/target/release/forge /usr/local/bin/forge
+COPY --from=foundry-builder /app/foundry/target/release/anvil /usr/local/bin/anvil
 
 RUN chmod +x /usr/local/bin/solc && \
-    chmod +x /usr/local/bin/forge
+    chmod +x /usr/local/bin/forge && \
+    chmod +x /usr/local/bin/anvil
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+EXPOSE 8545
 
 ENTRYPOINT ["/entrypoint.sh"]
