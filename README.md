@@ -1,7 +1,7 @@
 # foundry-alphanet
 
-Tools built around the patched versions of forge and the solidity compiler from
-[clabby/eip-3074-foundry], which support [EIP-3074] instructions.
+Tools built around the patched versions of revm, forge, and the solidity compiler from
+[anton-rs/3074-invokers], which support [EIP-3074] instructions.
 
 We intend to further roll out Foundry patches to support other EVM modifications such as
 new opcodes or precompiles.
@@ -72,5 +72,5 @@ $ docker run --rm \
     --foundry-command "anvil"
 ```
 
-[clabby/eip-3074-foundry]: https://github.com/clabby/eip-3074-foundry
+[anton-rs/3074-invokers]: https://github.com/anton-rs/3074-invokers
 [EIP-3074]: https://eips.ethereum.org/EIPS/eip-3074
