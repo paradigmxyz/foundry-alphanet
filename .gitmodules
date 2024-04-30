@@ -1,0 +1,6 @@
+[submodule "patches/foundry"]
+	path = patches/foundry
+	url = https://github.com/wevm/foundry
+[submodule "patches/solidity"]
+	path = patches/solidity
+	url = https://github.com/enitrat/solidity
