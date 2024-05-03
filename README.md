@@ -72,5 +72,7 @@ $ docker run --rm \
     --foundry-command "anvil"
 ```
 
+**Note:** if you're adding either the `--rpc-url` or `--fork-url` flag to your forge command and the RPC endpoint you're pointing to is on host, you should use http://host.docker.internal:8545 instead of http://localhost:8545 as the value. See Docker's networking docs [here](https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host).
+
 [anton-rs/3074-invokers]: https://github.com/anton-rs/3074-invokers
 [EIP-3074]: https://eips.ethereum.org/EIPS/eip-3074
